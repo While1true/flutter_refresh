@@ -89,7 +89,7 @@ class RefreshLayout extends StatefulWidget {
   const RefreshLayout({
     Key key,
     @required this.child,
-    this.nomore: false,
+    this.canloading: true,
     this.displacement: 20.0,
     @required this.onRefresh,
     this.color,
@@ -134,7 +134,7 @@ class RefreshLayout extends StatefulWidget {
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
 
-  final bool nomore;
+  final bool canloading;
 //  void dissmiss() {
 //    if(state!=null)
 //    state._dismiss(_RefreshLayoutMode.canceled);
@@ -246,7 +246,7 @@ class RefreshLayoutState extends State<RefreshLayout>
       /**
        * ----------------------------------------
        */
-      if (!widget.nomore && notification is UserScrollNotification &&
+      if (widget.canloading && notification is UserScrollNotification &&
           notification.metrics.extentAfter == 0.0 &&
           notification.direction == ScrollDirection.idle) {
         show(atTop: false);

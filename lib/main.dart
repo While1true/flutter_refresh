@@ -69,7 +69,7 @@ Future<Null> getData(){
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Expanded(child: RefreshLayout(nomore: isnomore, onRefresh: (boo) {
+            new Expanded(child: RefreshLayout(canloading: !isnomore, onRefresh: (boo) {
               if (!boo) {
                 return getData();
               }else{
