@@ -8,8 +8,8 @@ A new Flutter application.
 ## 使用：注意事项和官方一样，比如onrefresh要返回future； child：必须为scrollable
 ```
 RefreshLayout(
-    //是否显示加载更多
-    nomore: isnomore, 
+    //是否滑倒底部加载
+    canloading: canloading,
     onRefresh: (refresh) {
      //true:下拉刷新 false:上拉加载
                 },
