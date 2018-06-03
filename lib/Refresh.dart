@@ -89,6 +89,7 @@ class RefreshLayout extends StatefulWidget {
   const RefreshLayout({
     Key key,
     @required this.child,
+    this.canrefresh: true,
     this.canloading: true,
     this.displacement: 20.0,
     @required this.onRefresh,
@@ -135,6 +136,8 @@ class RefreshLayout extends StatefulWidget {
   final ScrollNotificationPredicate notificationPredicate;
 
   final bool canloading;
+  final bool canrefresh;
+
 //  void dissmiss() {
 //    if(state!=null)
 //    state._dismiss(_RefreshLayoutMode.canceled);
@@ -271,7 +274,8 @@ class RefreshLayoutState extends State<RefreshLayout>
     else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case _RefreshLayoutMode.armed:
-          _show();
+          if (widget.canrefresh)
+            _show();
           break;
         case _RefreshLayoutMode.drag:
           _dismiss(_RefreshLayoutMode.canceled);
@@ -481,7 +485,8 @@ class RefreshLayoutState extends State<RefreshLayout>
               alignment: _isIndicatorAtTop
                   ? Alignment.topCenter
                   : Alignment.bottomCenter,
-              child: _isIndicatorAtTop ? new ScaleTransition(
+              child: _isIndicatorAtTop ? (widget.canrefresh
+                  ? new ScaleTransition(
                 scale: _scaleFactor,
                 child: new AnimatedBuilder(
                   animation: _positionController,
@@ -493,7 +498,8 @@ class RefreshLayoutState extends State<RefreshLayout>
                     );
                   },
                 ),
-              ) : new AnimatedBuilder(
+              )
+                  : null) : new AnimatedBuilder(
                 animation: _positionController,
                 builder: (BuildContext context, Widget child) {
                   return new Container(decoration: new BoxDecoration(
