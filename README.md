@@ -22,7 +22,8 @@ RefreshLayout(
 ```
 
 ## 大小确定 radius=（宽度-gap*(count+1)）/(2*count)   gap=radius/2
-
+ const MyProgress({@required this.size, this.milliseconds: 300, this.color: Colors
+      .green, this.count: 4});
 
 child: new MyProgress(size: new Size(100.0, 20.0))
 ```
