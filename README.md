@@ -19,5 +19,9 @@ RefreshLayout(
 
 ## progress使用
 ```
+
+## 大小确定 radius=（宽度-gap*(count+1)）/(2*count)   gap=radius/2
+
+
 child: new MyProgress(size: new Size(100.0, 20.0))
 ```
