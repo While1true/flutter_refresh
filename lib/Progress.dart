@@ -69,9 +69,7 @@ class _ProgressState extends State<MyProgress> with TickerProviderStateMixin {
   void dispose() {
     super.dispose();
     animators[0].removeListener(_change);
-    for (AnimationController _animationController in _animationControllers) {
-      _animationController.dispose();
-    }
+    _animationControllers[0].dispose();
   }
 }
 
