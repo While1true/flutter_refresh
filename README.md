@@ -12,6 +12,8 @@ gif看起来很快
 loadingBuilder:是加载更多的布局，不写使用默认
 ```
 RefreshLayout(
+     //是否下拉刷新
+    canrefresh:canrefresh
     //是否滑倒底部加载
     canloading: canloading,
     onRefresh: (refresh) 
