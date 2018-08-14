@@ -1,6 +1,7 @@
 # flutter_refresh progress
 
 A new Flutter application.
+Flutter Debug和Release流畅度差好远！！！
 
 ## 基于 refreshIndicate改造
 ![gif](https://github.com/While1true/flutter_refresh/blob/master/2018-06-02-15-14-48.gif)
