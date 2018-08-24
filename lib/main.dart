@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: new ListView(
                       children: _listBuilder(_counter),
                     ),
-                    loadingBuilder: (BuildContext context, Widget cc) {
+                    loadingBuilder: (BuildContext context) {
                       return Padding(padding: EdgeInsets.all(15.0),child: Text('正在加载中...'),);
                     })),
             new Text(

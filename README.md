@@ -27,7 +27,7 @@ RefreshLayout(
     {//true:下拉刷新 false:上拉加载},
     child: new ListView(children: _listBuilder(_counter) ,),
     loadingBuilder: 
-        (BuildContext context, Widget cc) {
+        (BuildContext context) {
            return Padding(padding: EdgeInsets.all(15.0),child: Text('正在加载中...'),);
         }))
             

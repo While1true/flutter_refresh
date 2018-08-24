@@ -35,6 +35,8 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// Used by [RefreshLayout.onRefresh].
 typedef Future<Null> RefreshCallback(bool refresh);
 
+typedef LoadingWidgeBuilder(BuildContext context);
+
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
 enum _RefreshLayoutMode {
@@ -137,7 +139,7 @@ class RefreshLayout extends StatefulWidget {
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
 
-  final TransitionBuilder loadingBuilder;
+  final LoadingWidgeBuilder loadingBuilder;
 
   final bool canloading;
   final bool canrefresh;
@@ -507,7 +509,9 @@ class RefreshLayoutState extends State<RefreshLayout>
               )
                   : null) : new AnimatedBuilder(
                 animation: _positionController,
-                builder: widget.loadingBuilder??defaultLoadingBuilder
+                builder: widget.loadingBuilder==null?defaultLoadingBuilder:(context, widge){
+                  return widget.loadingBuilder(context);
+                }
               ),
             ),
           ),
