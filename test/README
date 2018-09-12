@@ -1,0 +1,21 @@
+
+## 新的下拉刷新
+
+'''
+RefreshLayout(
+            header: (c, s) {
+              return _TextedRefresh(s, true);
+            },
+            footer: (c, s) {
+              return _TextedRefresh(s, false);
+            },
+            child: SingleChildScrollView(child: MyWideget(100),),
+            onRefresh: (b) async {
+              await Future.delayed(Duration(milliseconds:300));
+              setState(() {
+
+              });
+              return null;
+            },
+            valueChanged: (v) {})
+'''
