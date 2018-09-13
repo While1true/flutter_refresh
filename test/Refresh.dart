@@ -94,6 +94,7 @@ class RefreshLayout extends StatefulWidget {
     @required this.child,
     this.header,
     this.footer,
+    this.color,
     this.valueChanged,
     this.stateChanged,
     this.elastic = 2.5,
@@ -102,8 +103,7 @@ class RefreshLayout extends StatefulWidget {
     this.displacement: 45.0,
     @required this.onRefresh,
     this.notificationPredicate: defaultScrollNotificationPredicate,
-  })
-      : assert(child != null),
+  })  : assert(child != null),
         assert(onRefresh != null),
         assert(notificationPredicate != null),
         assert(elastic != null),
@@ -123,6 +123,8 @@ class RefreshLayout extends StatefulWidget {
   final double displacement;
 
   final double elastic;
+
+  final Color color;
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
@@ -193,14 +195,18 @@ class _RefreshLayoutState extends State<RefreshLayout>
                   child: _RefreshWrap(
                       height: widget.displacement,
                       header: _Refreshable(
+                        bgcolor: widget.color,
                         height: widget.displacement,
                         child: widget.header,
+                        isrefresh: true,
                         key: _headerKey,
                       ),
                       content: widget.child,
                       footer: _Refreshable(
+                        bgcolor: widget.color,
                         height: widget.displacement,
                         child: widget.footer,
+                        isrefresh: false,
                         key: _footerKey,
                       )));
             }),
@@ -227,9 +233,6 @@ class _RefreshLayoutState extends State<RefreshLayout>
         _mode == null &&
         _start(notification)) {
       _onStateChange(RefreshLayoutMode.drag);
-      setState(() {
-        _mode = RefreshLayoutMode.drag;
-      });
       return false;
     }
     if (_dragOffset == null) return false;
@@ -257,7 +260,7 @@ class _RefreshLayoutState extends State<RefreshLayout>
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case RefreshLayoutMode.armed:
-        /**
+          /**
          * 未设置刷新头时直接还原
          */
           if ((_isRefreshDrag && widget.header == null) ||
@@ -271,7 +274,7 @@ class _RefreshLayoutState extends State<RefreshLayout>
           _dismiss();
           break;
         default:
-        // do nothing
+          // do nothing
           break;
       }
     }
@@ -279,13 +282,14 @@ class _RefreshLayoutState extends State<RefreshLayout>
   }
 
   void _onStateChange(RefreshLayoutMode mode) {
+    _mode = mode;
     if (_isRefreshDrag == null || _isRefreshDrag) {
       _headerKey.currentState._stateChange(mode);
     } else {
       _footerKey.currentState._stateChange(mode);
     }
     if (widget.stateChanged != null) {
-        widget.stateChanged(mode, _isRefreshDrag);
+      widget.stateChanged(mode, _isRefreshDrag);
     }
   }
 
@@ -308,7 +312,7 @@ class _RefreshLayoutState extends State<RefreshLayout>
 
   bool _isAtEdge(ScrollNotification notification) =>
       (widget.canrefresh && notification.metrics.extentBefore == 0.0) ||
-          (widget.canloading && notification.metrics.extentAfter == 0.0);
+      (widget.canloading && notification.metrics.extentAfter == 0.0);
 
   bool _start(ScrollNotification notification) {
     _isRefreshDrag = notification.metrics.extentBefore == 0.0;
@@ -317,10 +321,9 @@ class _RefreshLayoutState extends State<RefreshLayout>
     return true;
   }
 
-  double _getEdgetValue(ScrollNotification notification) =>
-      _isRefreshDrag
-          ? notification.metrics.extentBefore
-          : notification.metrics.extentAfter;
+  double _getEdgetValue(ScrollNotification notification) => _isRefreshDrag
+      ? notification.metrics.extentBefore
+      : notification.metrics.extentAfter;
 
   void show(bool isRefresh) {
     _isRefreshDrag = isRefresh;
@@ -332,26 +335,21 @@ class _RefreshLayoutState extends State<RefreshLayout>
     final Completer<void> completer = new Completer<void>();
     await _positionController
         .animateTo(
-        _isRefreshDrag
-            ? (1.0 / _kDragSizeFactorLimit)
-            : (-1.0 / _kDragSizeFactorLimit),
-        duration: _kIndicatorSnapDuration)
+            _isRefreshDrag
+                ? (1.0 / _kDragSizeFactorLimit)
+                : (-1.0 / _kDragSizeFactorLimit),
+            duration: _kIndicatorSnapDuration)
         .then<void>((Null value) {
       if (mounted && _mode == RefreshLayoutMode.armed) {
         assert(widget.onRefresh != null);
         _onStateChange(RefreshLayoutMode.refresh);
-        setState(() {
-          // Show the indeterminate progress indicator.
-          _mode = RefreshLayoutMode.refresh;
-        });
-
         final Future<void> refreshResult = widget.onRefresh(_isRefreshDrag);
         assert(() {
           if (refreshResult == null)
             FlutterError.reportError(new FlutterErrorDetails(
               exception: new FlutterError(
                   'The onRefresh callback returned null.\n'
-                      'The RefreshIndicator onRefresh callback must return a Future.'),
+                  'The RefreshIndicator onRefresh callback must return a Future.'),
               context: 'when calling onRefresh',
               library: 'material library',
             ));
@@ -361,6 +359,7 @@ class _RefreshLayoutState extends State<RefreshLayout>
         refreshResult.whenComplete(() {
           if (mounted && _mode == RefreshLayoutMode.refresh) {
             completer.complete();
+            _onStateChange(RefreshLayoutMode.done);
             _dismiss();
           }
         });
@@ -369,15 +368,12 @@ class _RefreshLayoutState extends State<RefreshLayout>
   }
 
   void _dismiss() async {
-    _onStateChange(RefreshLayoutMode.done);
     await _positionController
         .animateTo(0.0, duration: _kIndicatorSnapDuration)
         .whenComplete(() {
       _dragOffset = null;
       _isRefreshDrag = null;
-      setState(() {
-        _mode = null;
-      });
+      _mode = null;
     });
   }
 
@@ -388,8 +384,8 @@ class _RefreshLayoutState extends State<RefreshLayout>
   }
 }
 
-typedef Widget RefreshableBuilder(BuildContext context,
-    RefreshLayoutMode state);
+typedef Widget RefreshableBuilder(
+    BuildContext context, RefreshLayoutMode state);
 //
 //class _ContetWrap extends StatefulWidget {
 //  final RefreshableBuilder child;
@@ -417,8 +413,15 @@ typedef Widget RefreshableBuilder(BuildContext context,
 class _Refreshable extends StatefulWidget {
   final double height;
   final RefreshableBuilder child;
+  final bool isrefresh;
+  final Color bgcolor;
 
-  const _Refreshable({@required this.height, @required this.child, Key key})
+  const _Refreshable(
+      {@required this.height,
+      @required this.child,
+      @required this.isrefresh,
+      this.bgcolor,
+      Key key})
       : super(key: key);
 
   @override
@@ -428,12 +431,19 @@ class _Refreshable extends StatefulWidget {
 class _RefreshableState extends State<_Refreshable> {
   RefreshLayoutMode state;
 
+  _RefreshableState();
+
   @override
   Widget build(BuildContext context) {
-    return new SizedBox(
-      height: widget.height,
-      child: Center(child: widget.child(context, state)),
-    );
+    return new Container(
+        padding: (widget.isrefresh
+            ? EdgeInsets.only(top: (_kDragSizeFactorLimit - 1) * widget.height)
+            : EdgeInsets.only(
+                bottom: (_kDragSizeFactorLimit - 1) * widget.height)),
+        constraints: new BoxConstraints.expand(
+            height: widget.height * _kDragSizeFactorLimit),
+        color: widget.bgcolor,
+        child: widget.child(context, state));
   }
 
   void _stateChange(RefreshLayoutMode state) {
@@ -452,13 +462,13 @@ class _RefreshWrap extends CustomMultiChildLayout {
     @required Widget content,
     @required _Refreshable footer,
   }) : super(
-      key: key,
-      delegate: _ReshLayoutDelegate(height),
-      children: <Widget>[
-        LayoutId(id: _ID.HEADER, child: header),
-        LayoutId(id: _ID.CONTENT, child: content),
-        LayoutId(id: _ID.FOOTER, child: footer),
-      ]);
+            key: key,
+            delegate: _ReshLayoutDelegate(height),
+            children: <Widget>[
+              LayoutId(id: _ID.HEADER, child: header),
+              LayoutId(id: _ID.CONTENT, child: content),
+              LayoutId(id: _ID.FOOTER, child: footer),
+            ]);
 }
 
 class _ReshLayoutDelegate extends MultiChildLayoutDelegate {
@@ -471,7 +481,7 @@ class _ReshLayoutDelegate extends MultiChildLayoutDelegate {
     if (hasChild(_ID.HEADER)) {
       var box = new BoxConstraints.tightFor(width: size.width);
       layoutChild(_ID.HEADER, box);
-      positionChild(_ID.HEADER, Offset(0.0, -height));
+      positionChild(_ID.HEADER, Offset(0.0, -height * _kDragSizeFactorLimit));
     }
     if (hasChild(_ID.CONTENT)) {
       var box = new BoxConstraints.tight(size);
@@ -490,6 +500,5 @@ class _ReshLayoutDelegate extends MultiChildLayoutDelegate {
     return false;
   }
 }
-
 
 enum _ID { HEADER, CONTENT, FOOTER }
