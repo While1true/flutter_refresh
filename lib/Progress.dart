@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
+@Deprecated("以前写的不建议用")
 class MyProgress extends StatefulWidget {
   final Size size;
   final Color color;

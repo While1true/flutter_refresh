@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-
 // The over-scroll distance that moves the indicator to its maximum
 // displacement, as a percentage of the scrollable's container extent.
 const double _kDragContainerExtentPercentage = 0.25;
@@ -99,8 +98,7 @@ class RefreshLayout extends StatefulWidget {
     this.color,
     this.backgroundColor,
     this.notificationPredicate: defaultScrollNotificationPredicate,
-  })
-      : assert(child != null),
+  })  : assert(child != null),
         assert(onRefresh != null),
         assert(onRefresh != null),
         assert(notificationPredicate != null),
@@ -158,7 +156,6 @@ class RefreshLayout extends StatefulWidget {
 //    this.nomore = nomore;
 //  }
 
-
   @override
   RefreshLayoutState createState() => new RefreshLayoutState();
 }
@@ -188,8 +185,8 @@ class RefreshLayoutState extends State<RefreshLayout>
       begin: 0.0,
       end: _kDragSizeFactorLimit,
     ).animate(_positionController);
-    _value = new Tween<
-        double>( // The "value" of the circular progress indicator during a drag.
+    _value = new Tween<double>(
+      // The "value" of the circular progress indicator during a drag.
       begin: 0.0,
       end: 0.75,
     ).animate(_positionController);
@@ -207,12 +204,11 @@ class RefreshLayoutState extends State<RefreshLayout>
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _valueColor = new ColorTween(
-        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme.accentColor).withOpacity(1.0)
-    ).animate(new CurvedAnimation(
-        parent: _positionController,
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
-    ));
+            begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+            end: (widget.color ?? theme.accentColor).withOpacity(1.0))
+        .animate(new CurvedAnimation(
+            parent: _positionController,
+            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)));
     super.didChangeDependencies();
   }
 
@@ -229,7 +225,8 @@ class RefreshLayoutState extends State<RefreshLayout>
     }
     if (notification is ScrollStartNotification &&
         notification.metrics.extentBefore == 0.0 &&
-        _mode == null && _start(notification.metrics.axisDirection)) {
+        _mode == null &&
+        _start(notification.metrics.axisDirection)) {
       setState(() {
         _mode = _RefreshLayoutMode.drag;
       });
@@ -257,7 +254,8 @@ class RefreshLayoutState extends State<RefreshLayout>
       /**
        * ----------------------------------------
        */
-      if (widget.canloading && notification is UserScrollNotification &&
+      if (widget.canloading &&
+          notification is UserScrollNotification &&
           notification.metrics.extentAfter == 0.0 &&
           notification.direction == ScrollDirection.idle) {
         show(atTop: false);
@@ -278,18 +276,16 @@ class RefreshLayoutState extends State<RefreshLayout>
         _dragOffset -= notification.overscroll / 2.0;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
-    }
-    else if (notification is ScrollEndNotification) {
+    } else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case _RefreshLayoutMode.armed:
-          if (widget.canrefresh)
-            _show();
+          if (widget.canrefresh) _show();
           break;
         case _RefreshLayoutMode.drag:
           _dismiss(_RefreshLayoutMode.canceled);
           break;
         default:
-        // do nothing
+          // do nothing
           break;
       }
     }
@@ -297,8 +293,7 @@ class RefreshLayoutState extends State<RefreshLayout>
   }
 
   bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
-    if (notification.depth != 0 || !notification.leading)
-      return false;
+    if (notification.depth != 0 || !notification.leading) return false;
     if (_mode == _RefreshLayoutMode.drag) {
       notification.disallowGlow();
       return true;
@@ -330,10 +325,10 @@ class RefreshLayoutState extends State<RefreshLayout>
   }
 
   void _checkDragOffset(double containerExtent) {
-    assert(_mode == _RefreshLayoutMode.drag ||
-        _mode == _RefreshLayoutMode.armed);
-    double newValue = _dragOffset /
-        (containerExtent * _kDragContainerExtentPercentage);
+    assert(
+        _mode == _RefreshLayoutMode.drag || _mode == _RefreshLayoutMode.armed);
+    double newValue =
+        _dragOffset / (containerExtent * _kDragContainerExtentPercentage);
     if (_mode == _RefreshLayoutMode.armed)
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     _positionController.value =
@@ -354,12 +349,12 @@ class RefreshLayoutState extends State<RefreshLayout>
     });
     switch (_mode) {
       case _RefreshLayoutMode.done:
-        await _scaleController.animateTo(
-            1.0, duration: _kIndicatorScaleDuration);
+        await _scaleController.animateTo(1.0,
+            duration: _kIndicatorScaleDuration);
         break;
       case _RefreshLayoutMode.canceled:
-        await _positionController.animateTo(
-            0.0, duration: _kIndicatorScaleDuration);
+        await _positionController.animateTo(0.0,
+            duration: _kIndicatorScaleDuration);
         break;
       default:
         assert(false);
@@ -380,50 +375,39 @@ class RefreshLayoutState extends State<RefreshLayout>
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshLayoutMode.snap;
     _positionController
-        .animateTo(
-        1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-        .then
-    <
-    void
-    >
-    (
-    (
-    Null
-    value
-    )
-    {
-    if (mounted && _mode == _RefreshLayoutMode.snap)
-    {
-    assert(widget.onRefresh != null);
-    setState(() {
-    // Show the indeterminate progress indicator.
-    _mode = _RefreshLayoutMode.refresh;
-    });
+        .animateTo(1.0 / _kDragSizeFactorLimit,
+            duration: _kIndicatorSnapDuration)
+        .then<void>((void value) {
+      if (mounted && _mode == _RefreshLayoutMode.snap) {
+        assert(widget.onRefresh != null);
+        setState(() {
+          // Show the indeterminate progress indicator.
+          _mode = _RefreshLayoutMode.refresh;
+        });
 
-    final Future<Null> refreshResult = widget.onRefresh(_isIndicatorAtTop);
-    assert(() {
-    if (refreshResult == null)
-    FlutterError.reportError(new FlutterErrorDetails(
-    exception: new FlutterError(
-    'The onRefresh callback returned null.\n'
-    'The RefreshLayout onRefresh callback must return a Future.'
-    ),
-    context: 'when calling onRefresh',
-    library: 'material library',
-    ));
-    return true;
-    }());
-    if (refreshResult == null)
-    return;
-    refreshResult.whenComplete(() {
-    if (mounted && _mode == _RefreshLayoutMode.refresh) {
-    completer.complete();
-    _dismiss(_isIndicatorAtTop?_RefreshLayoutMode.done:_RefreshLayoutMode.canceled);
-    }
+        final Future<Null> refreshResult = widget.onRefresh(_isIndicatorAtTop);
+        assert(() {
+          if (refreshResult == null)
+            FlutterError.reportError(new FlutterErrorDetails(
+              exception: new FlutterError(
+                  'The onRefresh callback returned null.\n'
+                  'The RefreshLayout onRefresh callback must return a Future.'),
+              context: 'when calling onRefresh',
+              library: 'material library',
+            ));
+          return true;
+        }());
+        if (refreshResult == null) return;
+        refreshResult.whenComplete(() {
+          if (mounted && _mode == _RefreshLayoutMode.refresh) {
+            completer.complete();
+            _dismiss(_isIndicatorAtTop
+                ? _RefreshLayoutMode.done
+                : _RefreshLayoutMode.canceled);
+          }
+        });
+      }
     });
-    }
-    }
-    );
   }
 
   /// Show the refresh indicator and run the refresh callback as if it had
@@ -442,11 +426,10 @@ class RefreshLayoutState extends State<RefreshLayout>
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<Null> show({ bool atTop: true }) {
+  Future<Null> show({bool atTop: true}) {
     if (_mode != _RefreshLayoutMode.refresh &&
         _mode != _RefreshLayoutMode.snap) {
-      if (_mode == null)
-        _start(atTop ? AxisDirection.down : AxisDirection.up);
+      if (_mode == null) _start(atTop ? AxisDirection.down : AxisDirection.up);
       _show();
     }
     return _pendingRefreshFuture;
@@ -493,26 +476,31 @@ class RefreshLayoutState extends State<RefreshLayout>
               alignment: _isIndicatorAtTop
                   ? Alignment.topCenter
                   : Alignment.bottomCenter,
-              child: _isIndicatorAtTop ? (widget.canrefresh
-                  ? new ScaleTransition(
-                scale: _scaleFactor,
-                child: new AnimatedBuilder(
-                  animation: _positionController,
-                  builder: (BuildContext context, Widget child) {
-                    return new RefreshProgressIndicator(
-                      value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
-                      backgroundColor: widget.backgroundColor,
-                    );
-                  },
-                ),
-              )
-                  : null) : new AnimatedBuilder(
-                animation: _positionController,
-                builder: widget.loadingBuilder==null?defaultLoadingBuilder:(context, widge){
-                  return widget.loadingBuilder(context);
-                }
-              ),
+              child: _isIndicatorAtTop
+                  ? (widget.canrefresh
+                      ? new ScaleTransition(
+                          scale: _scaleFactor,
+                          child: new AnimatedBuilder(
+                            animation: _positionController,
+                            builder: (BuildContext context, Widget child) {
+                              return new RefreshProgressIndicator(
+                                value: showIndeterminateIndicator
+                                    ? null
+                                    : _value.value,
+                                valueColor: _valueColor,
+                                backgroundColor: widget.backgroundColor,
+                              );
+                            },
+                          ),
+                        )
+                      : null)
+                  : new AnimatedBuilder(
+                      animation: _positionController,
+                      builder: widget.loadingBuilder == null
+                          ? defaultLoadingBuilder
+                          : (context, widge) {
+                              return widget.loadingBuilder(context);
+                            }),
             ),
           ),
         ),
@@ -521,30 +509,42 @@ class RefreshLayoutState extends State<RefreshLayout>
   }
 
   TransitionBuilder defaultLoadingBuilder;
+
   void initBuilder() {
     defaultLoadingBuilder = (BuildContext context, Widget cc) {
-      return new Container(decoration: new BoxDecoration(
-          gradient: new LinearGradient(begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0x40ffffff),
-                Color(0x99ffffff),
-                Color(0xBBffffff),
-                Color(0xDDffffff),
-                Colors.white
-              ])),
-        child: SizedBox(height: 60.0,
-          child: Center(child: new Row(
-            mainAxisSize: MainAxisSize.min, children: <Widget>[
-            new SizedBox(width: 16.0,
-              height: 16.0,
-              child: CircularProgressIndicator(strokeWidth: 1.3,
-                valueColor: _valueColor,
-                backgroundColor: widget.backgroundColor,),),
-            Padding(padding: EdgeInsets.all(3.0)),
-            Text('正在加载中...')
-          ],)),),);
+      return new Container(
+        decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+              Color(0x40ffffff),
+              Color(0x99ffffff),
+              Color(0xBBffffff),
+              Color(0xDDffffff),
+              Colors.white
+            ])),
+        child: SizedBox(
+          height: 60.0,
+          child: Center(
+              child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new SizedBox(
+                width: 16.0,
+                height: 16.0,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.3,
+                  valueColor: _valueColor,
+                  backgroundColor: widget.backgroundColor,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(3.0)),
+              Text('正在加载中...')
+            ],
+          )),
+        ),
+      );
     };
   }
 }
-

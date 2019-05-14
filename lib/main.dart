@@ -48,7 +48,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Key key = GlobalKey();
-  int _counter = 20;
+  int _counter = 3;
 
   Future<Null> getData() {
     setState(() {
